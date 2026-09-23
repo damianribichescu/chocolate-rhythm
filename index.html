@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Chocolate Rhythm</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='12' width='56' height='40' rx='7' fill='%235C3A21'/%3E%3Crect x='4' y='12' width='56' height='40' rx='7' fill='none' stroke='%233E2415' stroke-width='3'/%3E%3Cline x1='18' y1='12' x2='18' y2='52' stroke='%233E2415' stroke-width='3'/%3E%3Cline x1='32' y1='12' x2='32' y2='52' stroke='%233E2415' stroke-width='3'/%3E%3Cline x1='46' y1='12' x2='46' y2='52' stroke='%233E2415' stroke-width='3'/%3E%3Cline x1='4' y1='32' x2='60' y2='32' stroke='%233E2415' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<style>
+  :root{
+    --md-primary:#6B4226;
+    --md-on-primary:#FFFFFF;
+    --md-primary-container:#E8D0B3;
+    --md-on-primary-container:#2B1600;
+    --md-secondary:#7C5A3A;
+    --md-secondary-container:#F3DFC2;
+    --md-on-secondary-container:#2A1A06;
+    --md-surface:#FFF8F0;
+    --md-surface-container:#F7EDE1;
+    --md-surface-variant:#EDDFC9;
+    --md-on-surface:#241A0F;
+    --md-on-surface-variant:#574332;
+    --md-outline:#8A7359;
+    --md-outline-variant:#DCC9AE;
+    --md-error:#B3261E;
+    --note-color:#241A0F;
+    --highlight-color:#00A896;
+    --elevation-1:0 1px 2px 0 rgba(0,0,0,0.30), 0 1px 3px 1px rgba(0,0,0,0.15);
+    --elevation-2:0 1px 2px 0 rgba(0,0,0,0.30), 0 2px 6px 2px rgba(0,0,0,0.15);
+    --elevation-3:0 1px 3px 0 rgba(0,0,0,0.30), 0 4px 8px 3px rgba(0,0,0,0.15);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--md-surface-container);
+    color:var(--md-on-surface);
+    font-family:'Roboto',system-ui,sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .material-symbols-outlined{
+    font-variation-settings:'opsz' 24, 'wght' 400, 'FILL' 0, 'GRAD' 0;
+    font-size:24px;
+    line-height:1;
+    user-select:none;
+  }
+  .topbar{
+    background:var(--md-primary-container);
+    color:var(--md-on-primary-container);
+    padding:20px 20px 16px;
+    box-shadow:var(--elevation-1);
+  }
+  .title-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .choc-logo{
+    flex:none;
+    display:block;
+  }
+  .topbar h1{
+    margin:0;
+    font-size:22px;
+    font-weight:500;
+    letter-spacing:0;
+  }
+  .topbar p{
+    margin:4px 0 0;
+    font-size:13px;
+    color:var(--md-on-primary-container);
+    opacity:0.75;
+  }
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .card{
+    background:var(--md-surface);
+    border-radius:16px;
+    box-shadow:var(--elevation-1);
+    padding:16px;
+  }
+  .card h2{
+    font-size:13px;
+    font-weight:500;
+    text-transform:none;
+    color:var(--md-on-surface-variant);
+    margin:0 0 10px;
+  }
+  .toggle-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .seg-group{
+    display:inline-flex;
+    border:1px solid var(--md-outline);
+    border-radius:20px;
+    overflow:hidden;
+  }
+  .seg-btn{
+    font-family:inherit;
+    font-size:13px;
+    font-weight:500;
+    height:36px;
+    padding:0 16px;
+    border:none;
+    background:var(--md-surface);
+    color:var(--md-on-surface-variant);
+    cursor:pointer;
+    transition:background 0.15s, color 0.15s;
+  }
+  .seg-btn + .seg-btn{ border-left:1px solid var(--md-outline); }
+  .seg-btn.selected{
+    background:var(--md-secondary-container);
+    color:var(--md-on-secondary-container);
+  }
+  .seg-btn:disabled{ opacity:0.5; cursor:default; }
+  .staff-scroll{
+    overflow-x:auto;
+    overflow-y:hidden;
+    border-radius:12px;
+    background:#FFFFFF;
+    -webkit-overflow-scrolling:touch;
+  }
+  #staffSvg{
+    display:block;
+    height:200px;
+    width:1007px;
+    touch-action:manipulation;
+  }
+  #staffSvg *{ pointer-events:none; }
+  #staffSvg .bg-click, #staffSvg .item-hit{ pointer-events:all; cursor:pointer; }
+  #staffSvg .item-hit:hover{ fill:rgba(103,80,164,0.08); }
+  .note-visual.playing ellipse,
+  .note-visual.playing rect,
+  .note-visual.playing path,
+  .note-visual.playing line,
+  .note-visual.playing text{
+    stroke:var(--highlight-color) !important;
+    fill:var(--highlight-color) !important;
+    transition:fill 0.05s, stroke 0.05s;
+  }
+  .hint{
+    margin:10px 2px 0;
+    font-size:12px;
+    color:var(--md-on-surface-variant);
+  }
+  .bar-meters{
+    margin-top:14px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .bar-meter{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .bar-meter-name{
+    font-size:12px;
+    color:var(--md-on-surface-variant);
+    min-width:52px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .choc-square{
+    flex:none;
+    display:block;
+  }
+  .bar-meter-track{
+    flex:1;
+    height:6px;
+    border-radius:3px;
+    background:var(--md-surface-variant);
+    overflow:hidden;
+  }
+  .bar-meter-fill{
+    height:100%;
+    width:0%;
+    background:var(--md-primary);
+    border-radius:3px;
+    transition:width 0.15s ease, background 0.15s ease;
+  }
+  .bar-meter-fill.incomplete{
+    background:var(--md-error);
+  }
+  .bar-meter-count{
+    font-size:12px;
+    color:var(--md-on-surface-variant);
+    white-space:nowrap;
+    min-width:96px;
+    text-align:right;
+  }
+  .bar-meter-count.incomplete{
+    color:var(--md-error);
+    font-weight:500;
+  }
+  .staff-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:4px;
+    margin-top:8px;
+  }
+  .icon-btn{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--md-on-surface-variant);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background 0.15s, transform 0.08s;
+  }
+  .icon-btn:hover{ background:rgba(73,69,79,0.08); }
+  .icon-btn:active{ transform:scale(0.92); background:rgba(73,69,79,0.14); }
+  .icon-btn.active{
+    background:var(--md-secondary-container);
+    color:var(--md-on-secondary-container);
+  }
+  .icon-btn.active:hover{ background:var(--md-secondary-container); }
+  .swing-select{
+    flex:none;
+    height:40px;
+    padding:0 10px;
+    border-radius:20px;
+    border:1px solid var(--md-outline);
+    background:var(--md-surface);
+    color:var(--md-on-surface);
+    font-family:inherit;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .swing-select:focus{ outline:2px solid var(--md-primary); outline-offset:1px; }
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .chip-row:last-child{ margin-bottom:0; }
+  .chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    height:48px;
+    padding:0 14px 0 8px;
+    border-radius:24px;
+    border:1px solid var(--md-outline-variant);
+    background:var(--md-surface);
+    color:var(--md-on-surface-variant);
+    font-family:inherit;
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    transition:background 0.15s, border-color 0.15s, color 0.15s, transform 0.08s;
+  }
+  .chip:active{ transform:scale(0.96); }
+  .chip.selected{
+    background:var(--md-secondary-container);
+    color:var(--md-on-secondary-container);
+    border-color:transparent;
+  }
+  .chip-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:28px;
+    height:42px;
+  }
+  .chip.selected .chip-icon{ --note-color: var(--md-on-secondary-container); }
+  .chip-icon svg{ overflow:visible; }
+  .transport-card{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+  }
+  .fab{
+    flex:none;
+    width:56px;
+    height:56px;
+    border-radius:16px;
+    border:none;
+    background:var(--md-primary);
+    color:var(--md-on-primary);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:var(--elevation-2);
+    cursor:pointer;
+    transition:background 0.15s, transform 0.08s, box-shadow 0.15s;
+  }
+  .fab:active{ transform:scale(0.94); box-shadow:var(--elevation-1); }
+  .fab.playing{ background:var(--md-secondary); }
+  .fab:disabled{ background:var(--md-surface-variant); color:var(--md-outline); box-shadow:none; cursor:default; }
+  .tempo-control{
+    flex:1 1 160px;
+    min-width:0;
+  }
+  .tempo-control label{
+    display:block;
+    font-size:12px;
+    color:var(--md-on-surface-variant);
+    margin-bottom:4px;
+  }
+  .tempo-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  #tempo, #noteVolume, #clickVolume{
+    flex:1;
+    accent-color:var(--md-primary);
+    height:24px;
+  }
+  #tempoLabel, #noteVolumeLabel, #clickVolumeLabel{
+    font-size:13px;
+    font-weight:500;
+    min-width:64px;
+    text-align:right;
+    color:var(--md-on-surface);
+  }
+  .vol-icon{
+    font-size:20px;
+    color:var(--md-on-surface-variant);
+    flex:none;
+  }
+  .snackbar{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform:translate(-50%, 20px);
+    background:#313033;
+    color:#F4EFF4;
+    padding:14px 20px;
+    border-radius:8px;
+    font-size:14px;
+    box-shadow:var(--elevation-3);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.2s, transform 0.2s;
+    max-width:calc(100% - 32px);
+    text-align:center;
+    z-index:100;
+  }
+  .snackbar.show{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+  @media (max-width:400px){
+    .transport-card{ gap:14px; }
+    .fab{ width:52px; height:52px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="title-row">
+    <svg class="choc-logo" width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <mask id="biteMask">
+        <rect x="0" y="0" width="64" height="64" fill="#fff"/>
+        <circle cx="52" cy="16" r="9" fill="#000"/>
+      </mask>
+      <g mask="url(#biteMask)">
+        <rect x="4" y="12" width="56" height="40" rx="7" fill="#5C3A21"/>
+        <rect x="4" y="12" width="56" height="40" rx="7" fill="none" stroke="#3E2415" stroke-width="2.5"/>
+        <line x1="18" y1="12" x2="18" y2="52" stroke="#3E2415" stroke-width="2.2"/>
+        <line x1="32" y1="12" x2="32" y2="52" stroke="#3E2415" stroke-width="2.2"/>
+        <line x1="46" y1="12" x2="46" y2="52" stroke="#3E2415" stroke-width="2.2"/>
+        <line x1="4" y1="32" x2="60" y2="32" stroke="#3E2415" stroke-width="2.2"/>
+      </g>
+      <path d="M8,18 Q20,11 34,15" stroke="#8A6B4A" stroke-width="2" fill="none" opacity="0.45" stroke-linecap="round"/>
+    </svg>
+    <h1>Chocolate Rhythm</h1>
+  </div>
+  <p id="topSubtitle">Build one bar of music, then play it back</p>
+</header>
+
+<main>
+  <section class="card">
+    <div class="toggle-row">
+      <div class="seg-group" role="group" aria-label="Clef">
+        <button type="button" class="seg-btn selected" data-clef="treble" aria-pressed="true">Treble clef</button>
+        <button type="button" class="seg-btn" data-clef="bass" aria-pressed="false">Bass clef</button>
+      </div>
+      <div class="seg-group" role="group" aria-label="Number of bars">
+        <button type="button" class="seg-btn selected" data-bars="1" aria-pressed="true">1 bar</button>
+        <button type="button" class="seg-btn" data-bars="2" aria-pressed="false">2 bars</button>
+      </div>
+    </div>
+    <div class="staff-scroll">
+      <svg id="staffSvg" viewBox="0 0 1510 300" xmlns="http://www.w3.org/2000/svg" aria-label="Two-bar musical staff, tap to place a note or rest"></svg>
+    </div>
+    <p class="hint" id="hintText">Pick a duration and accidental below, then tap the staff at the pitch you want. Tap a placed note or rest to remove it.</p>
+    <div class="bar-meters">
+      <div class="bar-meter">
+        <span class="bar-meter-name"><svg class="choc-square" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="2" fill="#5C3A21"/><line x1="8" y1="1" x2="8" y2="15" stroke="#3E2415" stroke-width="1.4"/><line x1="1" y1="8" x2="15" y2="8" stroke="#3E2415" stroke-width="1.4"/></svg>Bar 1</span>
+        <div class="bar-meter-track"><div id="barFill0" class="bar-meter-fill"></div></div>
+        <span id="beatLabel0" class="bar-meter-count">0 / 4 beats</span>
+      </div>
+      <div class="bar-meter" id="bar2MeterRow">
+        <span class="bar-meter-name"><svg class="choc-square" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="2" fill="#5C3A21"/><line x1="8" y1="1" x2="8" y2="15" stroke="#3E2415" stroke-width="1.4"/><line x1="1" y1="8" x2="15" y2="8" stroke="#3E2415" stroke-width="1.4"/></svg>Bar 2</span>
+        <div class="bar-meter-track"><div id="barFill1" class="bar-meter-fill"></div></div>
+        <span id="beatLabel1" class="bar-meter-count">0 / 4 beats</span>
+      </div>
+    </div>
+    <div class="staff-actions">
+      <button id="undoBtn" class="icon-btn" aria-label="Undo last note">
+        <span class="material-symbols-outlined">undo</span>
+      </button>
+      <button id="clearBtn" class="icon-btn" aria-label="Clear bars">
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="seg-group" style="margin-bottom:16px;">
+      <button type="button" id="dotBtn" class="seg-btn" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="vertical-align:-3px;margin-right:4px;">
+          <circle cx="12" cy="12" r="4.5" fill="currentColor"/>
+        </svg>Dotted
+      </button>
+    </div>
+    <h2>Accidental</h2>
+    <div class="seg-group" id="accToggle" role="group" aria-label="Accidental" style="margin-bottom:16px;">
+      <button type="button" class="seg-btn" data-acc="flat" aria-pressed="false">♭ Flat</button>
+      <button type="button" class="seg-btn selected" data-acc="natural" aria-pressed="true">♮ Natural</button>
+      <button type="button" class="seg-btn" data-acc="sharp" aria-pressed="false">♯ Sharp</button>
+    </div>
+    <h2>Notes</h2>
+    <div class="chip-row" id="noteChips"></div>
+    <h2>Rests</h2>
+    <div class="chip-row" id="restChips"></div>
+  </section>
+
+  <section class="card transport-card">
+    <button id="playBtn" class="fab" aria-label="Play" disabled>
+      <span class="material-symbols-outlined" id="playIcon">play_arrow</span>
+    </button>
+    <button id="loopBtn" class="icon-btn" aria-label="Loop playback" aria-pressed="false">
+      <span class="material-symbols-outlined">repeat</span>
+    </button>
+    <button id="metronomeBtn" class="icon-btn" aria-label="Metronome" aria-pressed="false">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <path d="M7 20 L17 20 L13.5 4 L10.5 4 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <line x1="12" y1="18" x2="14.5" y2="6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="13.6" cy="10" r="1.3" fill="currentColor"/>
+        <circle cx="12" cy="19" r="1" fill="currentColor"/>
+      </svg>
+    </button>
+    <button id="swingBtn" class="icon-btn" aria-label="Swing" aria-pressed="false">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <ellipse cx="5" cy="18" rx="2.3" ry="1.6" transform="rotate(-20 5 18)" fill="currentColor"/>
+        <line x1="7" y1="17.3" x2="7" y2="7" stroke="currentColor" stroke-width="1.3"/>
+        <ellipse cx="16" cy="16" rx="2.3" ry="1.6" transform="rotate(-20 16 16)" fill="currentColor"/>
+        <line x1="18" y1="15.3" x2="18" y2="7" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="7" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="2.6"/>
+      </svg>
+    </button>
+    <select id="swingIntensity" class="swing-select" aria-label="Swing intensity">
+      <option value="60" selected>60%</option>
+      <option value="70">70%</option>
+      <option value="80">80%</option>
+    </select>
+    <div class="tempo-control">
+      <label for="tempo">Tempo</label>
+      <div class="tempo-row">
+        <input type="range" id="tempo" min="40" max="208" value="100" step="1">
+        <span id="tempoLabel">100 BPM</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Volume</h2>
+    <div class="tempo-control" style="margin-bottom:16px;">
+      <label for="noteVolume">Notes</label>
+      <div class="tempo-row">
+        <span class="material-symbols-outlined vol-icon">music_note</span>
+        <input type="range" id="noteVolume" min="0" max="100" value="80" step="1">
+        <span id="noteVolumeLabel">80%</span>
+      </div>
+    </div>
+    <div class="tempo-control">
+      <label for="clickVolume">Click track</label>
+      <div class="tempo-row">
+        <span class="material-symbols-outlined vol-icon">timer</span>
+        <input type="range" id="clickVolume" min="0" max="100" value="80" step="1">
+        <span id="clickVolumeLabel">80%</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="snackbar" class="snackbar" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Data ----------
+  var CLEFS = {
+    treble: {
+      symbol: '\uD834\uDD1E',
+      fontSize: 100,
+      textY: 192,
+      textX: 48,
+      pitches: [
+        {name:'C4', freq:261.63},
+        {name:'D4', freq:293.66},
+        {name:'E4', freq:329.63},
+        {name:'F4', freq:349.23},
+        {name:'G4', freq:392.00},
+        {name:'A4', freq:440.00},
+        {name:'B4', freq:493.88},
+        {name:'C5', freq:523.25},
+        {name:'D5', freq:587.33},
+        {name:'E5', freq:659.25},
+        {name:'F5', freq:698.46},
+        {name:'G5', freq:783.99},
+        {name:'A5', freq:880.00},
+        {name:'B5', freq:987.77},
+        {name:'C6', freq:1046.50}
+      ]
+    },
+    bass: {
+      symbol: '\uD834\uDD22',
+      fontSize: 66,
+      textY: 164,
+      textX: 46,
+      pitches: [
+        {name:'E2', freq:82.41},
+        {name:'F2', freq:87.31},
+        {name:'G2', freq:98.00},
+        {name:'A2', freq:110.00},
+        {name:'B2', freq:123.47},
+        {name:'C3', freq:130.81},
+        {name:'D3', freq:146.83},
+        {name:'E3', freq:164.81},
+        {name:'F3', freq:174.61},
+        {name:'G3', freq:196.00},
+        {name:'A3', freq:220.00},
+        {name:'B3', freq:246.94},
+        {name:'C4', freq:261.63},
+        {name:'D4', freq:293.66},
+        {name:'E4', freq:329.63}
+      ]
+    }
+  };
+  var currentClef = 'treble';
+
+  var DURATIONS = {
+    whole:       {beats:4,     label:'Whole'},
+    half:        {beats:2,     label:'Half'},
+    quarter:     {beats:1,     label:'Quarter'},
+    eighth:      {beats:0.5,   label:'Eighth'},
+    sixteenth:   {beats:0.25,  label:'Sixteenth'}
+  };
+  var NOTE_ORDER = ['whole','half','quarter','eighth','sixteenth'];
+  var FLAG_COUNTS = {eighth:1, sixteenth:2};
+  var DOT_MULTIPLIER = 1.5;
+
+  // Effective beat length of an item, accounting for the dot augmentation.
+  function itemBeats(item){
+    return DURATIONS[item.duration].beats * (item.dotted ? DOT_MULTIPLIER : 1);
+  }
+
+  var ACCIDENTALS = {
+    natural: {symbol:'', shift:0},
+    sharp:   {symbol:'\u266F', shift:1},
+    flat:    {symbol:'\u266D', shift:-1}
+  };
+
+  var BAR_BEATS = 4;
+  var STAFF_LEFT = 40;
+  var ENTRY_LEFT = 170;
+  var BAR_AREA_WIDTH = 620;
+  var SEPARATOR_GAP_BEFORE = 16;
+  var SEPARATOR_GAP_AFTER = 24;
+  var LEDGER_MAP = {0:[0], 12:[12], 13:[12], 14:[12,14]};
+
+  function computeLayout(count){
+    var areas = [{left: ENTRY_LEFT, width: BAR_AREA_WIDTH}];
+    var separatorX = null;
+    if(count === 2){
+      separatorX = ENTRY_LEFT + BAR_AREA_WIDTH + SEPARATOR_GAP_BEFORE;
+      var bar2Left = separatorX + SEPARATOR_GAP_AFTER;
+      areas.push({left: bar2Left, width: BAR_AREA_WIDTH});
+    }
+    var last = areas[areas.length - 1];
+    var staffRight = last.left + last.width + 20;
+    return {areas: areas, separatorX: separatorX, staffRight: staffRight};
+  }
+
+  // ---------- State ----------
+  var barCount = 1;
+  var bars = [[], []];
+  var selectedTool = {kind:'note', duration:'quarter'};
+  var selectedAccidental = 'natural';
+  var isDotted = false;
+  var actionStack = [];
+  var bpm = 100;
+  var isPlaying = false;
+  var isLooping = false;
+  var isMetronomeOn = false;
+  var isSwingOn = false;
+  var swingRatio = 0.60;
+  var noteVolume = 0.8;
+  var clickVolume = 0.8;
+  var audioCtx = null;
+  var activeNodes = [];
+  var playTimers = [];
+
+  function activeBars(){
+    return bars.slice(0, barCount);
+  }
+
+  // ---------- Geometry helpers ----------
+  function pitchY(i){ return 200 - i*10; }
+
+  // Bare notehead with a stem reaching an arbitrary target y (used for beamed notes,
+  // where the stem must reach a shared beam line rather than its own fixed length).
+  function noteHeadWithStemTo(cx, cy, duration, stemUp, targetY){
+    var rx = 7, ry = 5, sw = 1.6;
+    var filled = !(duration === 'whole' || duration === 'half');
+    var s = '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" transform="rotate(-20 '+cx+' '+cy+')" ' +
+            'fill="'+(filled ? 'var(--note-color)' : '#FFFFFF') + '" stroke="var(--note-color)" stroke-width="'+sw+'"/>';
+    var stemX = stemUp ? cx + 6.7 : cx - 6.7;
+    s += '<line x1="'+stemX+'" y1="'+cy+'" x2="'+stemX+'" y2="'+targetY+'" stroke="var(--note-color)" stroke-width="'+sw+'"/>';
+    return s;
+  }
+
+  function beamBar(x1, x2, y, thickness){
+    var half = thickness/2;
+    return '<rect x="'+Math.min(x1,x2)+'" y="'+(y-half)+'" width="'+Math.abs(x2-x1)+'" height="'+thickness+'" fill="var(--note-color)"/>';
+  }
+
+  function noteGlyph(cx, cy, duration, stemUp, scale){
+    scale = scale || 1;
+    var rx = 7*scale, ry = 5*scale, sw = 1.6*scale;
+    var filled = !(duration === 'whole' || duration === 'half');
+    var hasStem = duration !== 'whole';
+    var s = '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" transform="rotate(-20 '+cx+' '+cy+')" ' +
+            'fill="'+(filled ? 'var(--note-color)' : '#FFFFFF') + '" stroke="var(--note-color)" stroke-width="'+sw+'"/>';
+    if(hasStem){
+      var stemLen = 32*scale;
+      var dir = stemUp ? -1 : 1;
+      var stemX = stemUp ? cx + 6.7*scale : cx - 6.7*scale;
+      var stemY2 = cy + dir*stemLen;
+      s += '<line x1="'+stemX+'" y1="'+cy+'" x2="'+stemX+'" y2="'+stemY2+'" stroke="var(--note-color)" stroke-width="'+sw+'"/>';
+      var flags = FLAG_COUNTS[duration] || 0;
+      for(var f=0; f<flags; f++){
+        var fy = stemY2 + dir*f*8*scale;
+        var d;
+        if(stemUp){
+          d = 'M '+stemX+' '+fy+' C '+(stemX+10*scale)+' '+(fy+6*scale)+', '+(stemX+12*scale)+' '+(fy+14*scale)+', '+(stemX+2*scale)+' '+(fy+20*scale);
+        } else {
+          d = 'M '+stemX+' '+fy+' C '+(stemX-10*scale)+' '+(fy-6*scale)+', '+(stemX-12*scale)+' '+(fy-14*scale)+', '+(stemX-2*scale)+' '+(fy-20*scale);
+        }
+        s += '<path d="'+d+'" fill="none" stroke="var(--note-color)" stroke-width="'+sw+'" stroke-linecap="round"/>';
+      }
+    }
+    return s;
+  }
+
+  var REST_SYMBOLS = {
+    whole:     '\uD834\uDD3B',
+    half:      '\uD834\uDD3C',
+    quarter:   '\uD834\uDD3D',
+    eighth:    '\uD834\uDD3E',
+    sixteenth: '\uD834\uDD3F'
+  };
+  var REST_FONT_SIZE = {whole:34, half:34, quarter:40, eighth:40, sixteenth:40};
+  var REST_DY = {whole:8, half:8, quarter:12, eighth:12, sixteenth:12};
+  var REST_FONT_STACK = "'Segoe UI Symbol','Noto Music','Apple Symbols',serif";
+
+  function restGlyph(cx, cy, duration, scale){
+    scale = scale || 1;
+    var fontSize = REST_FONT_SIZE[duration] * scale;
+    var dy = REST_DY[duration] * scale;
+    return '<text x="'+cx+'" y="'+(cy+dy)+'" font-size="'+fontSize+'" text-anchor="middle" font-family="'+REST_FONT_STACK+'" fill="var(--note-color)">'+REST_SYMBOLS[duration]+'</text>';
+  }
+
+  // ---------- Chip palette ----------
+  function wrapIcon(inner, vb){
+    return '<svg viewBox="'+vb+'" width="28" height="42" overflow="visible">'+inner+'</svg>';
+  }
+
+  function buildChips(){
+    var noteHost = document.getElementById('noteChips');
+    var restHost = document.getElementById('restChips');
+    var noteHtml = '', restHtml = '';
+    NOTE_ORDER.forEach(function(d){
+      noteHtml += '<button type="button" class="chip" data-kind="note" data-duration="'+d+'" aria-pressed="false">' +
+        '<span class="chip-icon">'+wrapIcon(noteGlyph(16,42,d,true,0.62), '0 0 40 64')+'</span>' +
+        '<span>'+DURATIONS[d].label+'</span></button>';
+      restHtml += '<button type="button" class="chip" data-kind="rest" data-duration="'+d+'" aria-pressed="false">' +
+        '<span class="chip-icon">'+wrapIcon(restGlyph(18,32,d,0.85), '0 0 40 64')+'</span>' +
+        '<span>'+DURATIONS[d].label+'</span></button>';
+    });
+    noteHost.innerHTML = noteHtml;
+    restHost.innerHTML = restHtml;
+
+    function onChipClick(e){
+      var btn = e.target.closest('.chip');
+      if(!btn) return;
+      selectedTool = {kind: btn.dataset.kind, duration: btn.dataset.duration};
+      updateChipSelection();
+    }
+    noteHost.addEventListener('click', onChipClick);
+    restHost.addEventListener('click', onChipClick);
+    updateChipSelection();
+  }
+
+  function updateChipSelection(){
+    document.querySelectorAll('.chip').forEach(function(btn){
+      var isSel = btn.dataset.kind === selectedTool.kind && btn.dataset.duration === selectedTool.duration;
+      btn.classList.toggle('selected', isSel);
+      btn.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+    });
+  }
+
+  // ---------- Staff rendering ----------
+  function uid(){
+    return 'item-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
+  }
+
+  function totalBeatsForBar(barIndex){
+    return bars[barIndex].reduce(function(sum, it){ return sum + itemBeats(it); }, 0);
+  }
+
+  // Verifies that the notes and rests in each active bar add up to a complete
+  // measure (exactly BAR_BEATS). Returns one result per active bar.
+  function validateBars(){
+    var results = [];
+    for(var i = 0; i < barCount; i++){
+      var beats = totalBeatsForBar(i);
+      results.push({
+        barIndex: i,
+        beats: beats,
+        hasContent: bars[i].length > 0,
+        isComplete: Math.abs(beats - BAR_BEATS) < 1e-9
+      });
+    }
+    return results;
+  }
+
+  function render(){
+    var svg = document.getElementById('staffSvg');
+    var layout = computeLayout(barCount);
+    var parts = [];
+
+    // resize the SVG's viewBox and on-screen width to match the active bar count,
+    // keeping a consistent px-per-unit scale so note sizes stay the same either way
+    var viewBoxWidth = layout.staffRight + 40;
+    svg.setAttribute('viewBox', '0 0 ' + viewBoxWidth + ' 300');
+    svg.style.width = Math.round(viewBoxWidth * (200/300)) + 'px';
+    svg.setAttribute('aria-label', (barCount === 2 ? 'Two-bar' : 'One-bar') + ' musical staff, tap to place a note or rest');
+
+    // background click layers, one per bar
+    layout.areas.forEach(function(area, idx){
+      parts.push('<rect class="bg-click" data-bar-index="'+idx+'" x="'+area.left+'" y="0" width="'+area.width+'" height="300" fill="transparent"/>');
+    });
+
+    // staff lines (continuous across all active bars)
+    var lineYs = [100,120,140,160,180];
+    lineYs.forEach(function(y){
+      parts.push('<line x1="'+STAFF_LEFT+'" y1="'+y+'" x2="'+layout.staffRight+'" y2="'+y+'" stroke="var(--note-color)" stroke-width="1.4"/>');
+    });
+
+    // bar lines: opening, separator (if 2 bars), final double barline
+    parts.push('<line x1="'+STAFF_LEFT+'" y1="100" x2="'+STAFF_LEFT+'" y2="180" stroke="var(--note-color)" stroke-width="1.4"/>');
+    if(layout.separatorX !== null){
+      parts.push('<line x1="'+layout.separatorX+'" y1="100" x2="'+layout.separatorX+'" y2="180" stroke="var(--note-color)" stroke-width="1.4"/>');
+    }
+    parts.push('<line x1="'+(layout.staffRight-6)+'" y1="100" x2="'+(layout.staffRight-6)+'" y2="180" stroke="var(--note-color)" stroke-width="1.4"/>');
+    parts.push('<line x1="'+layout.staffRight+'" y1="100" x2="'+layout.staffRight+'" y2="180" stroke="var(--note-color)" stroke-width="3.2"/>');
+
+    // clef
+    var clefInfo = CLEFS[currentClef];
+    parts.push('<text x="'+clefInfo.textX+'" y="'+clefInfo.textY+'" font-size="'+clefInfo.fontSize+'" font-family=\'Segoe UI Symbol, Noto Music, Apple Symbols, serif\' fill="var(--note-color)">'+clefInfo.symbol+'</text>');
+
+    // time signature
+    parts.push('<text x="130" y="132" font-size="30" font-weight="700" text-anchor="middle" font-family="Roboto, sans-serif" fill="var(--note-color)">4</text>');
+    parts.push('<text x="130" y="172" font-size="30" font-weight="700" text-anchor="middle" font-family="Roboto, sans-serif" fill="var(--note-color)">4</text>');
+
+    // items, per active bar
+    var hitRects = [];
+    layout.areas.forEach(function(area, barIndex){
+      var cum = 0;
+      var laid = bars[barIndex].map(function(item){
+        var durBeats = itemBeats(item);
+        var xStart = area.left + (cum/BAR_BEATS)*area.width;
+        var w = (durBeats/BAR_BEATS)*area.width;
+        var cx = xStart + w/2;
+        cum += durBeats;
+        var entry = {item: item, cx: cx};
+        if(item.kind === 'note'){
+          entry.cy = pitchY(item.pitchIndex);
+        } else {
+          entry.cy = 140;
+        }
+        return entry;
+      });
+
+      // Detect beam groups: runs of consecutive notes with the same beamable
+      // duration (eighth or sixteenth), split into groups of at most 4 notes
+      // (the standard-notation maximum for a single beam group). Rests or a
+      // duration/kind change break the run.
+      var MAX_BEAM_GROUP = 4;
+      var beamGroups = [];
+      var p = 0;
+      while(p < laid.length){
+        var pItem = laid[p].item;
+        var beamable = pItem.kind === 'note' && (pItem.duration === 'eighth' || pItem.duration === 'sixteenth');
+        if(!beamable){ p++; continue; }
+        var q = p + 1;
+        while(q < laid.length && laid[q].item.kind === 'note' && laid[q].item.duration === pItem.duration && !!laid[q].item.dotted === !!pItem.dotted){
+          q++;
+        }
+        var chunkStart = p;
+        while(chunkStart < q){
+          var chunkEnd = Math.min(chunkStart + MAX_BEAM_GROUP, q);
+          if(chunkEnd - chunkStart >= 2){
+            var group = laid.slice(chunkStart, chunkEnd);
+            var avgIdx = group.reduce(function(s,e){ return s + e.item.pitchIndex; }, 0) / group.length;
+            var stemUp = avgIdx <= 6;
+            var dir = stemUp ? -1 : 1;
+            var extremeCy = stemUp
+              ? Math.min.apply(null, group.map(function(e){ return e.cy; }))
+              : Math.max.apply(null, group.map(function(e){ return e.cy; }));
+            var beamY = extremeCy + dir*32;
+            group.forEach(function(e){
+              e.inBeamGroup = true;
+              e.groupStemUp = stemUp;
+              e.beamTargetY = beamY;
+            });
+            beamGroups.push({entries: group, duration: pItem.duration, stemUp: stemUp, dir: dir, beamY: beamY});
+          }
+          chunkStart = chunkEnd;
+        }
+        p = q;
+      }
+
+      // Render each item (notes in a beam group get a bare stem reaching the shared beam)
+      laid.forEach(function(entry){
+        var item = entry.item;
+        var cx = entry.cx;
+        var glyphInner = '';
+        if(item.kind === 'note'){
+          var cy = entry.cy;
+          var ledgers = LEDGER_MAP[item.pitchIndex] || [];
+          ledgers.forEach(function(li){
+            var ly = pitchY(li);
+            glyphInner += '<line x1="'+(cx-13)+'" y1="'+ly+'" x2="'+(cx+13)+'" y2="'+ly+'" stroke="var(--note-color)" stroke-width="1.4"/>';
+          });
+          if(item.accidental && item.accidental !== 'natural'){
+            glyphInner += '<text x="'+(cx-15)+'" y="'+(cy+6)+'" font-size="20" text-anchor="middle" font-family="Roboto, sans-serif" fill="var(--note-color)">'+ACCIDENTALS[item.accidental].symbol+'</text>';
+          }
+          if(entry.inBeamGroup){
+            glyphInner += noteHeadWithStemTo(cx, cy, item.duration, entry.groupStemUp, entry.beamTargetY);
+          } else {
+            var stemUp = item.pitchIndex <= 6;
+            glyphInner += noteGlyph(cx, cy, item.duration, stemUp, 1);
+          }
+          if(item.dotted){
+            var dotY = (item.pitchIndex % 2 === 0) ? cy - 5 : cy;
+            glyphInner += '<circle cx="'+(cx+13)+'" cy="'+dotY+'" r="1.8" fill="var(--note-color)"/>';
+          }
+        } else {
+          glyphInner += restGlyph(cx, 140, item.duration, 1);
+          if(item.dotted){
+            glyphInner += '<circle cx="'+(cx+13)+'" cy="140" r="1.8" fill="var(--note-color)"/>';
+          }
+        }
+        parts.push('<g class="note-visual" data-item-id="'+item.id+'">'+glyphInner+'</g>');
+        hitRects.push('<rect class="item-hit" data-item-id="'+item.id+'" x="'+(cx-24)+'" y="30" width="44" height="240" fill="transparent"/>');
+      });
+
+      // Draw the connecting beam bar(s) for each beam group, on top of the stems
+      beamGroups.forEach(function(g){
+        var stemXs = g.entries.map(function(e){ return e.groupStemUp ? e.cx + 6.7 : e.cx - 6.7; });
+        var x1 = stemXs[0], x2 = stemXs[stemXs.length - 1];
+        parts.push(beamBar(x1, x2, g.beamY, 4.5));
+        if(g.duration === 'sixteenth'){
+          var secondaryY = g.beamY - g.dir*8;
+          parts.push(beamBar(x1, x2, secondaryY, 4.5));
+        }
+      });
+    });
+
+    // hit rects go last so they sit on top for reliable tap-to-delete
+    hitRects.forEach(function(r){ parts.push(r); });
+
+    svg.innerHTML = parts.join('');
+
+    // beat meters + play availability
+    document.getElementById('bar2MeterRow').style.display = (barCount === 2) ? 'flex' : 'none';
+    var totalItems = 0;
+    var validation = validateBars();
+    validation.forEach(function(result){
+      var idx = result.barIndex;
+      var pct = Math.min(100, (result.beats/BAR_BEATS)*100);
+      var fillEl = document.getElementById('barFill'+idx);
+      var labelEl = document.getElementById('beatLabel'+idx);
+      fillEl.style.width = pct + '%';
+      var showWarning = result.hasContent && !result.isComplete;
+      fillEl.classList.toggle('incomplete', showWarning);
+      labelEl.classList.toggle('incomplete', showWarning);
+      var tbDisplay = Math.round(result.beats*1000)/1000;
+      var suffix = result.isComplete ? ' \u2713' : (showWarning ? ' \u26A0' : '');
+      labelEl.textContent = tbDisplay + ' / ' + BAR_BEATS + ' beats' + suffix;
+      totalItems += bars[idx].length;
+    });
+    document.getElementById('playBtn').disabled = totalItems === 0 || isPlaying;
+    document.getElementById('undoBtn').disabled = actionStack.length === 0;
+  }
+
+  // ---------- Interaction ----------
+  function getSVGCoords(evt){
+    var svg = document.getElementById('staffSvg');
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    var ctm = svg.getScreenCTM().inverse();
+    var loc = pt.matrixTransform(ctm);
+    return {x: loc.x, y: loc.y};
+  }
+
+  function tryAddItem(barIndex, y){
+    var baseDur = DURATIONS[selectedTool.duration].beats * (isDotted ? DOT_MULTIPLIER : 1);
+    if(totalBeatsForBar(barIndex) + baseDur > BAR_BEATS + 1e-9){
+      showSnackbar('Not enough room left in bar ' + (barIndex+1));
+      return;
+    }
+    var item = {id: uid(), kind: selectedTool.kind, duration: selectedTool.duration, pitchIndex: null, accidental: null, dotted: isDotted};
+    if(selectedTool.kind === 'note'){
+      var i = Math.round((200 - y) / 10);
+      if(i < 0) i = 0;
+      if(i > 14) i = 14;
+      item.pitchIndex = i;
+      item.accidental = selectedAccidental;
+      if(selectedAccidental !== 'natural'){
+        selectedAccidental = 'natural';
+        updateAccidentalSelection();
+      }
+    }
+    if(isDotted){
+      isDotted = false;
+      updateDotSelection();
+    }
+    bars[barIndex].push(item);
+    actionStack.push({barIndex: barIndex, id: item.id});
+    render();
+  }
+
+  function removeItemById(id){
+    for(var b=0; b<bars.length; b++){
+      var idx = bars[b].findIndex(function(it){ return it.id === id; });
+      if(idx !== -1){
+        bars[b].splice(idx, 1);
+        actionStack = actionStack.filter(function(a){ return a.id !== id; });
+        render();
+        return;
+      }
+    }
+  }
+
+  function undoLast(){
+    var last = actionStack.pop();
+    if(!last) return;
+    var arr = bars[last.barIndex];
+    var idx = arr.findIndex(function(it){ return it.id === last.id; });
+    if(idx !== -1) arr.splice(idx, 1);
+    render();
+  }
+
+  function onStaffClick(e){
+    if(isPlaying) return;
+    var target = e.target;
+    if(target.classList && target.classList.contains('item-hit')){
+      removeItemById(target.dataset.itemId);
+      return;
+    }
+    if(target.classList && target.classList.contains('bg-click')){
+      var coords = getSVGCoords(e);
+      var barIndex = parseInt(target.dataset.barIndex, 10);
+      tryAddItem(barIndex, coords.y);
+    }
+  }
+
+  // ---------- Snackbar ----------
+  var snackbarTimer = null;
+  function showSnackbar(msg){
+    var el = document.getElementById('snackbar');
+    el.textContent = msg;
+    el.classList.add('show');
+    if(snackbarTimer) clearTimeout(snackbarTimer);
+    snackbarTimer = setTimeout(function(){ el.classList.remove('show'); }, 2200);
+  }
+
+  // ---------- Playback ----------
+  function highlightItem(id, on){
+    var el = document.querySelector('.note-visual[data-item-id="'+id+'"]');
+    if(el) el.classList.toggle('playing', on);
+  }
+
+  function updatePlayButton(){
+    var btn = document.getElementById('playBtn');
+    var icon = document.getElementById('playIcon');
+    btn.classList.toggle('playing', isPlaying);
+    icon.textContent = isPlaying ? 'stop' : 'play_arrow';
+    btn.setAttribute('aria-label', isPlaying ? 'Stop' : 'Play');
+    var totalItems = activeBars().reduce(function(sum, b){ return sum + b.length; }, 0);
+    btn.disabled = totalItems === 0 && !isPlaying;
+    document.querySelectorAll('.seg-btn').forEach(function(b){ b.disabled = isPlaying; });
+  }
+
+  function stopPlayback(){
+    playTimers.forEach(function(t){ clearTimeout(t); });
+    playTimers = [];
+    activeNodes.forEach(function(entry){ try{ entry.node.stop(); }catch(e){} });
+    activeNodes = [];
+    isPlaying = false;
+    updatePlayButton();
+    document.querySelectorAll('.note-visual.playing').forEach(function(el){ el.classList.remove('playing'); });
+  }
+
+  function scheduleMetronomeClick(time, freq, peak){
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(peak, time + 0.002);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(time);
+    var stopTime = time + 0.06;
+    osc.stop(stopTime);
+    activeNodes.push({node: osc, stopTime: stopTime});
+  }
+
+  // Maps a "straight" beat position to a swung one. Swing only shifts timing
+  // WITHIN each beat (the off-beat eighth lands late, the on-beat eighth
+  // holds longer) — it always maps whole-beat positions to themselves, so
+  // overall bar length and metronome timing are unaffected.
+  function swingWarp(beatPos){
+    if(!isSwingOn) return beatPos;
+    var beatIndex = Math.floor(beatPos);
+    var frac = beatPos - beatIndex;
+    var newFrac = (frac < 0.5)
+      ? frac * (2 * swingRatio)
+      : swingRatio + (frac - 0.5) * (2 * (1 - swingRatio));
+    return beatIndex + newFrac;
+  }
+
+  // Schedules exactly one pass through the active bar(s) starting at the given
+  // precise audio-clock time, and returns the audio-clock time it ends at.
+  function scheduleIteration(startTime){
+    var allItems = [].concat.apply([], activeBars());
+    var secPerBeat = 60 / bpm;
+
+    // drop oscillator refs that have already finished, so a long loop session
+    // doesn't accumulate stale references forever
+    activeNodes = activeNodes.filter(function(entry){ return entry.stopTime > audioCtx.currentTime; });
+
+    if(isMetronomeOn && clickVolume > 0.004){
+      var totalBeatCount = BAR_BEATS * barCount;
+      var accentPeak = 0.625 * clickVolume;
+      var normalPeak = 0.4 * clickVolume;
+      for(var beatIdx = 0; beatIdx < totalBeatCount; beatIdx++){
+        // beatIdx is always a whole beat, so swingWarp leaves it unchanged —
+        // the metronome click stays a steady, unswung pulse.
+        var tickTime = startTime + swingWarp(beatIdx) * secPerBeat;
+        var isAccent = (beatIdx % BAR_BEATS) === 0;
+        scheduleMetronomeClick(tickTime, isAccent ? 1500 : 1000, isAccent ? accentPeak : normalPeak);
+      }
+    }
+
+    var notePeak = 0.4 * noteVolume;
+    var nowMs = audioCtx.currentTime * 1000;
+    var beatCursor = 0;
+    allItems.forEach(function(item){
+      var durBeats = itemBeats(item);
+      var straightStart = beatCursor;
+      var straightEnd = beatCursor + durBeats;
+      var t = startTime + swingWarp(straightStart) * secPerBeat;
+      var dur = (swingWarp(straightEnd) - swingWarp(straightStart)) * secPerBeat;
+
+      if(item.kind === 'note' && notePeak > 0.004){
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        var baseFreq = CLEFS[currentClef].pitches[item.pitchIndex].freq;
+        var shift = (item.accidental && ACCIDENTALS[item.accidental]) ? ACCIDENTALS[item.accidental].shift : 0;
+        osc.frequency.value = baseFreq * Math.pow(2, shift/12);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(notePeak, t + 0.015);
+        var releaseStart = Math.max(t + 0.02, t + dur*0.82);
+        gain.gain.setValueAtTime(notePeak, releaseStart);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur*0.98);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t);
+        var stopTime = t + dur + 0.02;
+        osc.stop(stopTime);
+        activeNodes.push({node: osc, stopTime: stopTime});
+      }
+      var delayMs = (t * 1000) - nowMs;
+      (function(id, dMs, durMs){
+        playTimers.push(setTimeout(function(){ highlightItem(id, true); }, Math.max(0, dMs)));
+        playTimers.push(setTimeout(function(){ highlightItem(id, false); }, Math.max(0, dMs + durMs)));
+      })(item.id, delayMs, dur*1000);
+      beatCursor = straightEnd;
+    });
+
+    var minRequiredSec = isMetronomeOn ? (BAR_BEATS * barCount * secPerBeat) : 0;
+    var endTime = Math.max(startTime + beatCursor*secPerBeat, startTime + minRequiredSec);
+    return endTime;
+  }
+
+  // Schedules the loop's next pass early enough (LOOKAHEAD_MS before the
+  // current one ends) that the next iteration's audio, which starts at the
+  // exact endTime of this one, has zero gap — Web Audio plays scheduled
+  // events at their precise time regardless of when we call .start().
+  var LOOKAHEAD_MS = 150;
+
+  function runIterationChain(startTime){
+    var endTime = scheduleIteration(startTime);
+    var msUntilEnd = (endTime - audioCtx.currentTime) * 1000;
+    var msUntilLookahead = Math.max(0, msUntilEnd - LOOKAHEAD_MS);
+    playTimers.push(setTimeout(function(){
+      if(isLooping){
+        runIterationChain(endTime);
+      } else {
+        scheduleStopAt(endTime);
+      }
+    }, msUntilLookahead));
+  }
+
+  function scheduleStopAt(endTime){
+    var msUntilEnd = Math.max(0, (endTime - audioCtx.currentTime) * 1000);
+    playTimers.push(setTimeout(function(){
+      isPlaying = false;
+      updatePlayButton();
+    }, msUntilEnd + 40));
+  }
+
+  function playBar(){
+    var allItems = [].concat.apply([], activeBars());
+    if(allItems.length === 0){
+      isPlaying = false;
+      updatePlayButton();
+      return;
+    }
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+
+    playTimers = [];
+    activeNodes = [];
+    isPlaying = true;
+    updatePlayButton();
+
+    var startTime = audioCtx.currentTime + 0.05;
+    runIterationChain(startTime);
+  }
+
+  function updateCopyText(){
+    var subtitle = document.getElementById('topSubtitle');
+    var hint = document.getElementById('hintText');
+    if(barCount === 2){
+      subtitle.textContent = 'Build a two-bar phrase, then play it back';
+      hint.textContent = 'Pick a duration and accidental below, then tap either bar at the pitch you want. Tap a placed note or rest to remove it.';
+    } else {
+      subtitle.textContent = 'Build one bar of music, then play it back';
+      hint.textContent = 'Pick a duration and accidental below, then tap the staff at the pitch you want. Tap a placed note or rest to remove it.';
+    }
+  }
+
+  function setBarCount(n){
+    if(n === barCount) return;
+    if(n < barCount){
+      var hadNotes = false;
+      for(var i = n; i < bars.length; i++){
+        if(bars[i].length > 0) hadNotes = true;
+        bars[i] = [];
+      }
+      actionStack = actionStack.filter(function(a){ return a.barIndex < n; });
+      if(hadNotes) showSnackbar('Removed bar ' + (n+1) + ' and its notes');
+    }
+    barCount = n;
+    updateCopyText();
+    render();
+  }
+
+  // ---------- Wire up ----------
+  document.getElementById('staffSvg').addEventListener('click', onStaffClick);
+  document.getElementById('undoBtn').addEventListener('click', function(){
+    if(isPlaying) return;
+    undoLast();
+  });
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    if(isPlaying) return;
+    bars = [[], []];
+    actionStack = [];
+    render();
+  });
+  document.getElementById('playBtn').addEventListener('click', function(){
+    if(isPlaying){
+      stopPlayback();
+      return;
+    }
+    var incomplete = validateBars().filter(function(r){ return r.hasContent && !r.isComplete; });
+    if(incomplete.length > 0){
+      var names = incomplete.map(function(r){ return 'Bar ' + (r.barIndex+1); }).join(' and ');
+      showSnackbar(names + (incomplete.length > 1 ? ' are' : ' is') + ' short of a full measure \u2014 playing anyway');
+    }
+    playBar();
+  });
+  document.getElementById('loopBtn').addEventListener('click', function(){
+    isLooping = !isLooping;
+    var btn = document.getElementById('loopBtn');
+    btn.classList.toggle('active', isLooping);
+    btn.setAttribute('aria-pressed', isLooping ? 'true' : 'false');
+    showSnackbar(isLooping ? 'Loop enabled' : 'Loop disabled');
+  });
+  document.getElementById('metronomeBtn').addEventListener('click', function(){
+    isMetronomeOn = !isMetronomeOn;
+    var btn = document.getElementById('metronomeBtn');
+    btn.classList.toggle('active', isMetronomeOn);
+    btn.setAttribute('aria-pressed', isMetronomeOn ? 'true' : 'false');
+    showSnackbar(isMetronomeOn ? 'Metronome enabled' : 'Metronome disabled');
+  });
+  document.getElementById('swingBtn').addEventListener('click', function(){
+    isSwingOn = !isSwingOn;
+    var btn = document.getElementById('swingBtn');
+    btn.classList.toggle('active', isSwingOn);
+    btn.setAttribute('aria-pressed', isSwingOn ? 'true' : 'false');
+    showSnackbar(isSwingOn ? 'Swing enabled' : 'Swing disabled');
+  });
+  document.getElementById('swingIntensity').addEventListener('change', function(e){
+    swingRatio = parseInt(e.target.value, 10) / 100;
+  });
+  document.getElementById('tempo').addEventListener('input', function(e){
+    bpm = parseInt(e.target.value, 10);
+    document.getElementById('tempoLabel').textContent = bpm + ' BPM';
+  });
+  document.getElementById('noteVolume').addEventListener('input', function(e){
+    noteVolume = parseInt(e.target.value, 10) / 100;
+    document.getElementById('noteVolumeLabel').textContent = e.target.value + '%';
+  });
+  document.getElementById('clickVolume').addEventListener('input', function(e){
+    clickVolume = parseInt(e.target.value, 10) / 100;
+    document.getElementById('clickVolumeLabel').textContent = e.target.value + '%';
+  });
+
+  document.querySelectorAll('.seg-group[aria-label="Clef"] .seg-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(isPlaying) return;
+      currentClef = btn.dataset.clef;
+      document.querySelectorAll('.seg-group[aria-label="Clef"] .seg-btn').forEach(function(b){
+        var sel = b.dataset.clef === currentClef;
+        b.classList.toggle('selected', sel);
+        b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+      });
+      render();
+      showSnackbar((currentClef === 'treble' ? 'Treble' : 'Bass') + ' clef selected \u2014 note pitches now read from this clef');
+    });
+  });
+
+  function updateDotSelection(){
+    var btn = document.getElementById('dotBtn');
+    btn.classList.toggle('selected', isDotted);
+    btn.setAttribute('aria-pressed', isDotted ? 'true' : 'false');
+  }
+
+  document.getElementById('dotBtn').addEventListener('click', function(){
+    isDotted = !isDotted;
+    updateDotSelection();
+  });
+
+  function updateAccidentalSelection(){
+    document.querySelectorAll('#accToggle .seg-btn').forEach(function(b){
+      var sel = b.dataset.acc === selectedAccidental;
+      b.classList.toggle('selected', sel);
+      b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+    });
+  }
+
+  document.querySelectorAll('#accToggle .seg-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      selectedAccidental = btn.dataset.acc;
+      updateAccidentalSelection();
+    });
+  });
+
+  document.querySelectorAll('.seg-group[aria-label="Number of bars"] .seg-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(isPlaying) return;
+      var n = parseInt(btn.dataset.bars, 10);
+      document.querySelectorAll('.seg-group[aria-label="Number of bars"] .seg-btn').forEach(function(b){
+        var sel = parseInt(b.dataset.bars, 10) === n;
+        b.classList.toggle('selected', sel);
+        b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+      });
+      setBarCount(n);
+    });
+  });
+
+  // "The Lick" — the famous jazz phrase, as the default starter composition.
+  // D E F G E C D (natural notes). Standard rhythm: four eighths, a quarter
+  // (on the 5th note), then two more eighths — sums to one full bar.
+  var THE_LICK = [
+    {pitchIndex:1, duration:'eighth'},
+    {pitchIndex:2, duration:'eighth'},
+    {pitchIndex:3, duration:'eighth'},
+    {pitchIndex:4, duration:'eighth'},
+    {pitchIndex:2, duration:'quarter'},
+    {pitchIndex:0, duration:'eighth'},
+    {pitchIndex:1, duration:'eighth'}
+  ];
+
+  function loadDefaultComposition(){
+    THE_LICK.forEach(function(n){
+      var item = {id: uid(), kind: 'note', duration: n.duration, pitchIndex: n.pitchIndex, accidental: 'natural'};
+      bars[0].push(item);
+      actionStack.push({barIndex: 0, id: item.id});
+    });
+  }
+
+  buildChips();
+  loadDefaultComposition();
+  updateCopyText();
+  render();
+})();
+</script>
+</body>
+</html>
