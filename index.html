@@ -27,6 +27,7 @@
     --md-error:#B3261E;
     --note-color:#241A0F;
     --highlight-color:#00A896;
+    --staff-height:200px;
     --elevation-1:0 1px 2px 0 rgba(0,0,0,0.30), 0 1px 3px 1px rgba(0,0,0,0.15);
     --elevation-2:0 1px 2px 0 rgba(0,0,0,0.30), 0 2px 6px 2px rgba(0,0,0,0.15);
     --elevation-3:0 1px 3px 0 rgba(0,0,0,0.30), 0 4px 8px 3px rgba(0,0,0,0.15);
@@ -133,7 +134,7 @@
   }
   #staffSvg{
     display:block;
-    height:200px;
+    height:var(--staff-height, 200px);
     width:1007px;
     touch-action:manipulation;
   }
@@ -245,44 +246,51 @@
     cursor:pointer;
   }
   .swing-select:focus{ outline:2px solid var(--md-primary); outline-offset:1px; }
-  .chip-row{
+  .palette-toolbar{
     display:flex;
     flex-wrap:wrap;
-    gap:8px;
-    margin-bottom:16px;
+    align-items:center;
+    gap:5px;
+    margin-bottom:12px;
   }
-  .chip-row:last-child{ margin-bottom:0; }
-  .chip{
+  .palette-group{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+  }
+  .palette-divider{
+    width:1px;
+    align-self:stretch;
+    min-height:26px;
+    background:var(--md-outline-variant);
+    margin:0 2px;
+  }
+  .icon-chip{
     display:flex;
     align-items:center;
-    gap:6px;
-    height:48px;
-    padding:0 14px 0 8px;
-    border-radius:24px;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    padding:0;
+    border-radius:50%;
     border:1px solid var(--md-outline-variant);
     background:var(--md-surface);
     color:var(--md-on-surface-variant);
     font-family:inherit;
-    font-size:13px;
+    font-size:17px;
     font-weight:500;
+    line-height:1;
     cursor:pointer;
     transition:background 0.15s, border-color 0.15s, color 0.15s, transform 0.08s;
   }
-  .chip:active{ transform:scale(0.96); }
-  .chip.selected{
+  .icon-chip:active{ transform:scale(0.92); }
+  .icon-chip.selected{
     background:var(--md-secondary-container);
     color:var(--md-on-secondary-container);
     border-color:transparent;
   }
-  .chip-icon{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:28px;
-    height:42px;
-  }
-  .chip.selected .chip-icon{ --note-color: var(--md-on-secondary-container); }
-  .chip-icon svg{ overflow:visible; }
+  .icon-chip.selected svg{ --note-color: var(--md-on-secondary-container); }
+  .icon-chip svg{ overflow:visible; }
   .transport-card{
     display:flex;
     align-items:center;
@@ -361,9 +369,17 @@
     opacity:1;
     transform:translate(-50%, 0);
   }
-  @media (max-width:400px){
-    .transport-card{ gap:14px; }
-    .fab{ width:52px; height:52px; }
+  @media (max-width:480px){
+    main{ padding:10px; gap:12px; }
+    .card{ padding:12px; }
+    .topbar{ padding:14px 14px 12px; }
+    :root{ --staff-height:150px; }
+    .icon-btn{ width:36px; height:36px; }
+    .icon-chip{ width:31px; height:31px; font-size:15px; }
+    .transport-card{ gap:12px; }
+    .fab{ width:50px; height:50px; }
+    .choc-logo{ width:32px; height:32px; }
+    .topbar h1{ font-size:19px; }
   }
 </style>
 </head>
@@ -403,10 +419,24 @@
         <button type="button" class="seg-btn" data-bars="2" aria-pressed="false">2 bars</button>
       </div>
     </div>
+    <div class="palette-toolbar">
+      <button type="button" id="dotBtn" class="icon-chip" aria-pressed="false" aria-label="Dotted" title="Dotted">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/></svg>
+      </button>
+      <div id="accToggle" class="palette-group" role="group" aria-label="Accidental">
+        <button type="button" class="icon-chip" data-acc="flat" aria-pressed="false" aria-label="Flat" title="Flat">♭</button>
+        <button type="button" class="icon-chip selected" data-acc="natural" aria-pressed="true" aria-label="Natural" title="Natural">♮</button>
+        <button type="button" class="icon-chip" data-acc="sharp" aria-pressed="false" aria-label="Sharp" title="Sharp">♯</button>
+      </div>
+      <div class="palette-divider"></div>
+      <div class="palette-group" id="noteChips"></div>
+      <div class="palette-divider"></div>
+      <div class="palette-group" id="restChips"></div>
+    </div>
     <div class="staff-scroll">
       <svg id="staffSvg" viewBox="0 0 1510 300" xmlns="http://www.w3.org/2000/svg" aria-label="Two-bar musical staff, tap to place a note or rest"></svg>
     </div>
-    <p class="hint" id="hintText">Pick a duration and accidental below, then tap the staff at the pitch you want. Tap a placed note or rest to remove it.</p>
+    <p class="hint" id="hintText">Pick a duration and accidental above, then tap the staff at the pitch you want. Tap a placed note or rest to remove it.</p>
     <div class="bar-meters">
       <div class="bar-meter">
         <span class="bar-meter-name"><svg class="choc-square" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="2" fill="#5C3A21"/><line x1="8" y1="1" x2="8" y2="15" stroke="#3E2415" stroke-width="1.4"/><line x1="1" y1="8" x2="15" y2="8" stroke="#3E2415" stroke-width="1.4"/></svg>Bar 1</span>
@@ -427,26 +457,6 @@
         <span class="material-symbols-outlined">delete</span>
       </button>
     </div>
-  </section>
-
-  <section class="card">
-    <div class="seg-group" style="margin-bottom:16px;">
-      <button type="button" id="dotBtn" class="seg-btn" aria-pressed="false">
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="vertical-align:-3px;margin-right:4px;">
-          <circle cx="12" cy="12" r="4.5" fill="currentColor"/>
-        </svg>Dotted
-      </button>
-    </div>
-    <h2>Accidental</h2>
-    <div class="seg-group" id="accToggle" role="group" aria-label="Accidental" style="margin-bottom:16px;">
-      <button type="button" class="seg-btn" data-acc="flat" aria-pressed="false">♭ Flat</button>
-      <button type="button" class="seg-btn selected" data-acc="natural" aria-pressed="true">♮ Natural</button>
-      <button type="button" class="seg-btn" data-acc="sharp" aria-pressed="false">♯ Sharp</button>
-    </div>
-    <h2>Notes</h2>
-    <div class="chip-row" id="noteChips"></div>
-    <h2>Rests</h2>
-    <div class="chip-row" id="restChips"></div>
   </section>
 
   <section class="card transport-card">
@@ -699,7 +709,7 @@
 
   // ---------- Chip palette ----------
   function wrapIcon(inner, vb){
-    return '<svg viewBox="'+vb+'" width="28" height="42" overflow="visible">'+inner+'</svg>';
+    return '<svg viewBox="'+vb+'" width="20" height="30" overflow="visible">'+inner+'</svg>';
   }
 
   function buildChips(){
@@ -707,18 +717,16 @@
     var restHost = document.getElementById('restChips');
     var noteHtml = '', restHtml = '';
     NOTE_ORDER.forEach(function(d){
-      noteHtml += '<button type="button" class="chip" data-kind="note" data-duration="'+d+'" aria-pressed="false">' +
-        '<span class="chip-icon">'+wrapIcon(noteGlyph(16,42,d,true,0.62), '0 0 40 64')+'</span>' +
-        '<span>'+DURATIONS[d].label+'</span></button>';
-      restHtml += '<button type="button" class="chip" data-kind="rest" data-duration="'+d+'" aria-pressed="false">' +
-        '<span class="chip-icon">'+wrapIcon(restGlyph(18,32,d,0.85), '0 0 40 64')+'</span>' +
-        '<span>'+DURATIONS[d].label+'</span></button>';
+      noteHtml += '<button type="button" class="icon-chip" data-kind="note" data-duration="'+d+'" aria-pressed="false" aria-label="'+DURATIONS[d].label+' note" title="'+DURATIONS[d].label+' note">' +
+        wrapIcon(noteGlyph(16,42,d,true,0.62), '0 0 40 64') + '</button>';
+      restHtml += '<button type="button" class="icon-chip" data-kind="rest" data-duration="'+d+'" aria-pressed="false" aria-label="'+DURATIONS[d].label+' rest" title="'+DURATIONS[d].label+' rest">' +
+        wrapIcon(restGlyph(18,32,d,0.85), '0 0 40 64') + '</button>';
     });
     noteHost.innerHTML = noteHtml;
     restHost.innerHTML = restHtml;
 
     function onChipClick(e){
-      var btn = e.target.closest('.chip');
+      var btn = e.target.closest('.icon-chip');
       if(!btn) return;
       selectedTool = {kind: btn.dataset.kind, duration: btn.dataset.duration};
       updateChipSelection();
@@ -729,7 +737,7 @@
   }
 
   function updateChipSelection(){
-    document.querySelectorAll('.chip').forEach(function(btn){
+    document.querySelectorAll('.icon-chip[data-kind]').forEach(function(btn){
       var isSel = btn.dataset.kind === selectedTool.kind && btn.dataset.duration === selectedTool.duration;
       btn.classList.toggle('selected', isSel);
       btn.setAttribute('aria-pressed', isSel ? 'true' : 'false');
@@ -767,10 +775,12 @@
     var parts = [];
 
     // resize the SVG's viewBox and on-screen width to match the active bar count,
-    // keeping a consistent px-per-unit scale so note sizes stay the same either way
+    // keeping a consistent px-per-unit scale (based on the CSS-driven height,
+    // which may shrink on narrow screens) so note sizes stay proportional
     var viewBoxWidth = layout.staffRight + 40;
     svg.setAttribute('viewBox', '0 0 ' + viewBoxWidth + ' 300');
-    svg.style.width = Math.round(viewBoxWidth * (200/300)) + 'px';
+    var staffHeightPx = parseFloat(getComputedStyle(svg).height) || 200;
+    svg.style.width = Math.round(viewBoxWidth * (staffHeightPx/300)) + 'px';
     svg.setAttribute('aria-label', (barCount === 2 ? 'Two-bar' : 'One-bar') + ' musical staff, tap to place a note or rest');
 
     // background click layers, one per bar
@@ -1298,14 +1308,14 @@
   });
 
   function updateAccidentalSelection(){
-    document.querySelectorAll('#accToggle .seg-btn').forEach(function(b){
+    document.querySelectorAll('#accToggle .icon-chip').forEach(function(b){
       var sel = b.dataset.acc === selectedAccidental;
       b.classList.toggle('selected', sel);
       b.setAttribute('aria-pressed', sel ? 'true' : 'false');
     });
   }
 
-  document.querySelectorAll('#accToggle .seg-btn').forEach(function(btn){
+  document.querySelectorAll('#accToggle .icon-chip').forEach(function(btn){
     btn.addEventListener('click', function(){
       selectedAccidental = btn.dataset.acc;
       updateAccidentalSelection();
@@ -1350,6 +1360,16 @@
   loadDefaultComposition();
   updateCopyText();
   render();
+
+  var resizeTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(render, 120);
+  });
+  window.addEventListener('orientationchange', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(render, 120);
+  });
 })();
 </script>
 </body>
