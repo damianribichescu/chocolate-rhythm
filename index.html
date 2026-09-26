@@ -109,10 +109,10 @@
   }
   .seg-btn{
     font-family:inherit;
-    font-size:13px;
+    font-size:12px;
     font-weight:500;
-    height:36px;
-    padding:0 16px;
+    height:30px;
+    padding:0 11px;
     border:none;
     background:var(--md-surface);
     color:var(--md-on-surface-variant);
@@ -254,9 +254,7 @@
     margin-bottom:12px;
   }
   .palette-group{
-    display:flex;
-    flex-wrap:wrap;
-    gap:5px;
+    display:contents;
   }
   .palette-divider{
     width:1px;
@@ -380,6 +378,8 @@
     .fab{ width:50px; height:50px; }
     .choc-logo{ width:32px; height:32px; }
     .topbar h1{ font-size:19px; }
+    .seg-btn{ height:28px; padding:0 9px; font-size:11.5px; }
+    .toggle-row{ gap:8px; }
   }
 </style>
 </head>
@@ -411,12 +411,12 @@
   <section class="card">
     <div class="toggle-row">
       <div class="seg-group" role="group" aria-label="Clef">
-        <button type="button" class="seg-btn selected" data-clef="treble" aria-pressed="true">Treble clef</button>
-        <button type="button" class="seg-btn" data-clef="bass" aria-pressed="false">Bass clef</button>
+        <button type="button" class="seg-btn selected" data-clef="treble" aria-pressed="true" aria-label="Treble clef">Treble</button>
+        <button type="button" class="seg-btn" data-clef="bass" aria-pressed="false" aria-label="Bass clef">Bass</button>
       </div>
       <div class="seg-group" role="group" aria-label="Number of bars">
-        <button type="button" class="seg-btn selected" data-bars="1" aria-pressed="true">1 bar</button>
-        <button type="button" class="seg-btn" data-bars="2" aria-pressed="false">2 bars</button>
+        <button type="button" class="seg-btn selected" data-bars="1" aria-pressed="true" aria-label="1 bar">1 bar</button>
+        <button type="button" class="seg-btn" data-bars="2" aria-pressed="false" aria-label="2 bars">2 bars</button>
       </div>
     </div>
     <div class="palette-toolbar">
